@@ -4,28 +4,30 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y libfontconfig1-dev libfreetype6-dev
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          # 关键改动：将编译器版本更新到 1.88.0 以匹配您的新环境
-          toolchain: 1.88.0
-          override: true
+      - name: Install Rust toolchain
+        run: rustup toolchain install 1.88.0 --profile minimal
 
       - name: Build
-        run: cargo build --release
+        run: cargo +1.88.0 build --locked --release
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: libmeme-generator-contrib-so-1.88.0
           path: target/release/libmeme_generator_contrib.so
+          if-no-files-found: error
